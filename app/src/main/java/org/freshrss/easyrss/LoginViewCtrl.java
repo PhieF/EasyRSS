@@ -4,7 +4,7 @@
  * are made available under the terms of the GNU Public License v3.0
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
- * 
+ *
  * Contributors:
  *     Pursuer - initial API and implementation
  ******************************************************************************/
@@ -40,6 +40,7 @@ public class LoginViewCtrl extends AbsViewCtrl implements ReaderAccountMgrListen
     private String serverUrl;
     private String user;
     private String pass;
+    private boolean hasTriedFreshRSS;
 
     @SuppressLint("HandlerLeak")
     public LoginViewCtrl(final DataMgr dataMgr, final Context context) {
@@ -49,41 +50,47 @@ public class LoginViewCtrl extends AbsViewCtrl implements ReaderAccountMgrListen
             @Override
             public void handleMessage(final Message msg) {
                 switch (msg.what) {
-                case MSG_LOGIN_SUCCEEDED:
-                    ReaderAccountMgr.getInstance().setClientLogin(serverUrl, user, pass);
-                    Toast.makeText(context, R.string.MsgLoginSucceeded, Toast.LENGTH_LONG).show();
-                    if (listener != null) {
-                        listener.onLogin(true);
-                    }
-                    break;
-                case MSG_LOGIN_FAILED:
-                    Toast.makeText(context, R.string.MsgLoginFailed, Toast.LENGTH_LONG).show();
-                    final View btnLogin = view.findViewById(R.id.BtnLogin);
-                    btnLogin.setEnabled(true);
-                    if (listener != null) {
-                        listener.onLogin(false);
-                    }
-                    break;
-                case MSG_GAIN_AUTH_SUCCEEDED:
-                    Toast.makeText(context, R.string.MsgAuthenticationSucceeded, Toast.LENGTH_LONG).show();
-                    ReaderAccountMgr.getInstance().setNonClientLogin(user);
-                    if (authPendingDialog != null) {
-                        authPendingDialog.dismiss();
-                    }
-                    if (listener != null) {
-                        listener.onLogin(true);
-                    }
-                    break;
-                case MSG_GAIN_AUTH_FAILED:
-                    Toast.makeText(context, R.string.MsgAuthenticationFailed, Toast.LENGTH_LONG).show();
-                    if (authPendingDialog != null) {
-                        authPendingDialog.dismiss();
-                    }
-                    if (listener != null) {
-                        listener.onLogin(false);
-                    }
-                    break;
-                default:
+                    case MSG_LOGIN_SUCCEEDED:
+                        ReaderAccountMgr.getInstance().setClientLogin(serverUrl, user, pass);
+                        Toast.makeText(context, R.string.MsgLoginSucceeded, Toast.LENGTH_LONG).show();
+                        if (listener != null) {
+                            listener.onLogin(true);
+                        }
+                        break;
+                    case MSG_LOGIN_FAILED:
+                        if(!hasTriedFreshRSS) {
+                            hasTriedFreshRSS = true;
+                            serverUrl += "/p/api/greader.php";
+                            connect();
+                        } else {
+                            Toast.makeText(context, R.string.MsgLoginFailed, Toast.LENGTH_LONG).show();
+                            final View btnLogin = view.findViewById(R.id.BtnLogin);
+                            btnLogin.setEnabled(true);
+                            if (listener != null) {
+                                listener.onLogin(false);
+                            }
+                        }
+                        break;
+                    case MSG_GAIN_AUTH_SUCCEEDED:
+                        Toast.makeText(context, R.string.MsgAuthenticationSucceeded, Toast.LENGTH_LONG).show();
+                        ReaderAccountMgr.getInstance().setNonClientLogin(user);
+                        if (authPendingDialog != null) {
+                            authPendingDialog.dismiss();
+                        }
+                        if (listener != null) {
+                            listener.onLogin(true);
+                        }
+                        break;
+                    case MSG_GAIN_AUTH_FAILED:
+                        Toast.makeText(context, R.string.MsgAuthenticationFailed, Toast.LENGTH_LONG).show();
+                        if (authPendingDialog != null) {
+                            authPendingDialog.dismiss();
+                        }
+                        if (listener != null) {
+                            listener.onLogin(false);
+                        }
+                        break;
+                    default:
                 }
             }
         };
@@ -99,10 +106,16 @@ public class LoginViewCtrl extends AbsViewCtrl implements ReaderAccountMgrListen
         if (pass != null) {
             if (succeeded) {
                 handler.sendEmptyMessage(MSG_LOGIN_SUCCEEDED);
-            } else {
+            }
+            else {
                 handler.sendEmptyMessage(MSG_LOGIN_FAILED);
             }
         }
+    }
+
+    public void connect(){
+        AbsURL.setServerUrl(serverUrl);
+        ReaderAccountMgr.getInstance().tryClientLogin(user, pass);
     }
 
     @Override
@@ -115,11 +128,11 @@ public class LoginViewCtrl extends AbsViewCtrl implements ReaderAccountMgrListen
             @Override
             public void onClick(final View view) {
                 view.setEnabled(false);
+                hasTriedFreshRSS = false;
                 serverUrl = ((EditText) LoginViewCtrl.this.view.findViewById(R.id.TxtServerUrl)).getText().toString();
-                AbsURL.setServerUrl(serverUrl);
                 user = ((EditText) LoginViewCtrl.this.view.findViewById(R.id.TxtUsername)).getText().toString();
                 pass = ((EditText) LoginViewCtrl.this.view.findViewById(R.id.TxtPassword)).getText().toString();
-                ReaderAccountMgr.getInstance().tryClientLogin(user, pass);
+                connect();
                 Toast.makeText(context, R.string.MsgLogging, Toast.LENGTH_LONG).show();
             }
         });

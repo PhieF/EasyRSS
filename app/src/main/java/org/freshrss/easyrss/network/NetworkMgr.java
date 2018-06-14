@@ -214,7 +214,13 @@ final public class NetworkMgr implements DataSyncerListener {
 
     public void login(final String user, final String pass) {
         if (loginThread != null && loginThread.isAlive()) {
-            return;
+            try {
+                loginThread.join(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (loginThread != null && loginThread.isAlive())
+                return;
         }
         loginThread = new Thread() {
             @Override
