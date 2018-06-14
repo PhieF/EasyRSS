@@ -1,0 +1,56 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+* .gitignore
+* .pmd
+* CHANGELOG.md
+* README.md
+* Screenshots/
+* Screenshots/1340421447509.jpg
+* Screenshots/1340421467846.jpg
+* Screenshots/1340421495067.jpg
+* Screenshots/1340421830809.jpg
+* Screenshots/1340421842676.jpg
+* Screenshots/1340421850816.jpg
+* Screenshots/1340421867026.jpg
+* Screenshots/1340421899486.jpg
+* Screenshots/1340421911826.jpg
+* Screenshots/1340421933706.jpg
+* Screenshots/1340421969606.jpg
+* Screenshots/1340421974709.jpg
+* license.txt
+* proguard.cfg
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+* AndroidManifest.xml => app/src/main/AndroidManifest.xml
+* libs/HtmlCleaner/src/ => app/src/main/java/
+* libs/jackson-core/src/main/java/ => app/src/main/java/
+* libs/jackson-core/src/main/java/com/fasterxml/jackson/core/json/PackageVersion.java.in => app/src/main/resources/com/fasterxml/jackson/core/json/PackageVersion.java.in
+* lint.xml => app/lint.xml
+* res/ => app/src/main/res/
+* src/ => app/src/main/java/
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)
